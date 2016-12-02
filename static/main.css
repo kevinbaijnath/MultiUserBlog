@@ -1,3 +1,31 @@
 #error {
     display: none;
 }
+
+.blog-row {
+    position: relative;
+}
+
+.blog-subject {
+    margin-bottom: 5px;
+}
+
+.blog-date {
+    position: absolute;
+    bottom:0;
+    right:0;
+}
+
+.blog-date > h4 {
+    margin-bottom: 5px;
+}
+
+.blog-divider {
+    border-bottom: 3px solid;
+    margin-top: 0px;
+    margin-bottom: 5px;
+}
+
+.blog-content {
+    white-space: pre-wrap;
+}

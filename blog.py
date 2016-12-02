@@ -9,17 +9,18 @@ import os
 #import hmac
 #from string import letters
 
-import webapp2 # pylint: disable=import-error
-import jinja2 #pylint: disable=import-error
+import webapp2
+import jinja2
+import logging
 
-from google.appengine.ext import db # pylint: disable=import-error
+from google.appengine.ext import db
 
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "templates")
 JINJA_ENV = jinja2.Environment(loader=jinja2.FileSystemLoader(TEMPLATE_DIR),
                                autoescape=True)
 SECRET = 'fart'
 
-class Blog(db.Model):
+class BlogPost(db.Model):
     """Defines the model for each blog post"""
     subject = db.StringProperty(required=True)
     content = db.TextProperty(required=True)
@@ -65,14 +66,19 @@ class MainHandler(webapp2.RequestHandler):
 class BlogFrontHandler(BlogHandler):
     """Front page of the blog"""
     def get(self):
-        """Renders the front page of the blog"""
-        self.render("blog_front.html")
+        """Renders multiple blog posts"""
+        blog_posts = BlogPost.gql("ORDER BY createdTime DESC").fetch(limit=10)
+
+        if blog_posts:
+            self.render("blog_post.html", blog_posts=blog_posts)
+        else:
+            self.error(404)
 
 class NewBlogPostHandler(BlogHandler):
     """New blog post page"""
     def get(self):
         """Render the new blog post page"""
-        self.render("create_post.html")
+        self.render("create_post.html", error="")
 
     def post(self):
         """NewBlogPost form submission"""
@@ -84,17 +90,25 @@ class NewBlogPostHandler(BlogHandler):
         elif not content:
             self.render("create_post.html", error="Please enter some content!", subject=subject)
         else:
-            post = Blog(subject=subject, content=content)
-            #post.put()
-            self.redirect('/blog/{0}', post.key().id())
+            post = BlogPost(subject=subject, content=content)
+            post.put()
+            self.redirect('/blog/{0}'.format(str(post.key().id())))
 
 class BlogPostHandler(BlogHandler):
     """Blog Post Page"""
-    def get(self):
-        """Specific Blog Post Page"""
-        self.render("blog_post.html")
 
-# pylint: disable=invalid-name
+    def get(self, blog_id):
+        """Renders a Blog Post Page based on the ID"""
+        if not blog_id.isdigit():
+            self.error(404)
+
+        blog_post = BlogPost.get_by_id(int(blog_id))
+
+        if blog_post:
+            self.render("blog_post.html", blog_posts=[blog_post])
+        else:
+            self.error(404)
+
 app = webapp2.WSGIApplication([("/", MainHandler),
                                ("/blog/?", BlogFrontHandler),
                                ("/blog/newpost", NewBlogPostHandler),

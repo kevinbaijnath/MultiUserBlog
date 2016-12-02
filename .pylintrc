@@ -1,0 +1,8 @@
+[BASIC]
+good-names=app
+
+[MESSAGES CONTROL]
+disable=import-error
+
+[TYPECHECK]
+ignored-classes=BlogPost

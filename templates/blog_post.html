@@ -1,4 +1,28 @@
 {% extends "base.html" %}
 
 {% block content %}
+    {% if blog_posts %}
+        {% for post in blog_posts %}
+            <div class="row blog-row">
+                <div class="col-md-10 col-lg-10">
+                    {{ post.ID }}
+                    <h2 class="blog-subject">{{ post.subject }}</h2>
+                </div>
+                <div class="col-md-2 col-lg-2 blog-date">
+                    <h4>{{ post.updatedDate.strftime("%B %d, %Y") }}</h4>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <hr class="blog-divider">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 col-lg-12 blog-content">
+                    <p>{{ post.content }}</p>
+                </div>
+            </div>
+        {% endfor %}
+        
+    {% endif %}
 {% endblock %}

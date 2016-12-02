@@ -21,11 +21,15 @@ SECRET = 'fart'
 
 class Blog(db.Model):
     """Defines the model for each blog post"""
-    title = db.StringProperty(required=True)
+    subject = db.StringProperty(required=True)
     content = db.TextProperty(required=True)
     createdTime = db.DateTimeProperty(auto_now_add=True)
     #Using auto_now to update the date each time the object is updated
     updatedDate = db.DateProperty(auto_now=True)
+
+    @classmethod
+    def create_blog(self):
+        pass
 
 def render_str(template, **params):
     """Renders a template along with any parameters as a string"""
@@ -35,18 +39,22 @@ def render_str(template, **params):
 
 class BlogHandler(webapp2.RequestHandler):
     """BaseClass for the Blog"""
-    def write(self, *a, **kw):
+    def write(self, *args, **kwargs):
         """Helper method to write out a response"""
-        self.response.out.write(*a, **kw)
+        self.response.out.write(*args, **kwargs)
 
     def render_str(self, template, **params):
         """Passes a user and renders a template as a string"""
         params['user'] = self.user
         return render_str(template, **params)
 
-    def render(self, template, **kw):
+    def render(self, template, **kwargs):
         """Renders a template"""
-        self.write(self.render_str(template, **kw))
+        self.write(self.render_str(template, **kwargs))
+
+    def __init__(self, *args, **kwargs):
+        self.user = None
+        super(BlogHandler, self).__init__(*args, **kwargs)
 
 class MainHandler(webapp2.RequestHandler):
     """Main Handler for the blog"""
@@ -54,14 +62,43 @@ class MainHandler(webapp2.RequestHandler):
         """Redirects to the blog page"""
         self.redirect("/blog")
 
-class BlogFront(BlogHandler):
+class BlogFrontHandler(BlogHandler):
     """Front page of the blog"""
     def get(self):
         """Renders the front page of the blog"""
-        pass
+        self.render("blog_front.html")
 
-APP = webapp2.WSGIApplication([("/", MainHandler),
-                               ('/blog/', BlogFront),
+class NewBlogPostHandler(BlogHandler):
+    """New blog post page"""
+    def get(self):
+        """Render the new blog post page"""
+        self.render("create_post.html")
+
+    def post(self):
+        """NewBlogPost form submission"""
+        subject = self.request.get("subject")
+        content = self.request.get("content")
+
+        if not subject:
+            self.render("create_post.html", error="Please enter a subject!", content=content)
+        elif not content:
+            self.render("create_post.html", error="Please enter some content!", subject=subject)
+        else:
+            post = Blog(subject=subject, content=content)
+            #post.put()
+            self.redirect('/blog/{0}', post.key().id())
+
+class BlogPostHandler(BlogHandler):
+    """Blog Post Page"""
+    def get(self):
+        """Specific Blog Post Page"""
+        self.render("blog_post.html")
+
+# pylint: disable=invalid-name
+app = webapp2.WSGIApplication([("/", MainHandler),
+                               ("/blog/?", BlogFrontHandler),
+                               ("/blog/newpost", NewBlogPostHandler),
+                               (r"/blog/(\d+)", BlogPostHandler)
                               ],
                               debug=True)
 

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="text-center">
+    Sign up for a new account
+</h2>
+<form action="/login" method="post">
+    <div class="form-group">
+        <label for="username">Username</label>
+        <input class="form-control" id="username" name="username" value={{username}}>
+    </div>
+    <div class="form-group">
+        <label for="password">Password</label>        
+        <input type="password" class="form-control" id="password" name="password">
+    </div>
+    <button type="submit" class="btn btn-primary">Log In</button>
+</form>
+{% endblock %}

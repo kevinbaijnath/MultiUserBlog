@@ -5,4 +5,4 @@ good-names=app
 disable=import-error
 
 [TYPECHECK]
-ignored-classes=BlogPost
+ignored-classes=BlogPost,User,SecureString,SecurePassword

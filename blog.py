@@ -35,6 +35,7 @@ class BlogPost(db.Model):
     subject = db.StringProperty(required=True)
     content = db.TextProperty(required=True)
     createdTime = db.DateTimeProperty(auto_now_add=True)
+    user_id = db.IntegerProperty(required=True)
     #Using auto_now to update the date each time the object is updated
     updatedDate = db.DateProperty(auto_now=True)
 
@@ -44,6 +45,7 @@ class User(db.Model):
     passwordHash = db.StringProperty(required=True)
     email = db.StringProperty()
     createdTime = db.DateTimeProperty(auto_now_add=True)
+    liked_posts = db.ListProperty()
 
     @classmethod
     def register(cls, username, password, email):
@@ -172,7 +174,10 @@ class BlogFrontHandler(BlogHandler):
         blog_posts = BlogPost.gql("ORDER BY createdTime DESC").fetch(limit=10)
 
         if blog_posts:
-            self.render("blog_post.html", blog_posts=blog_posts)
+            self.render("blog_post.html",
+                        blog_posts=blog_posts,
+                        user_id=self.user.key().id(),
+                        liked_posts=self.user.liked_posts)
         else:
             self.render("blog_post.html", blog_posts=[])
 
@@ -181,10 +186,16 @@ class NewBlogPostHandler(BlogHandler):
 
     def get(self):
         """Render the new blog post page"""
+        if not self.user:
+            self.redirect("/login")
+
         self.render("create_post.html", error="")
 
     def post(self):
         """NewBlogPost form submission"""
+        if not self.user:
+            self.redirect("/login")
+
         subject = self.request.get("subject")
         content = self.request.get("content")
 
@@ -193,7 +204,7 @@ class NewBlogPostHandler(BlogHandler):
         elif not content:
             self.render("create_post.html", error="Please enter some content!", subject=subject)
         else:
-            post = BlogPost(subject=subject, content=content)
+            post = BlogPost(subject=subject, content=content, user_id=self.user.key().id())
             post.put()
             self.redirect('/blog/{0}'.format(str(post.key().id())))
 
@@ -208,9 +219,65 @@ class BlogPostHandler(BlogHandler):
         blog_post = BlogPost.get_by_id(int(blog_id))
 
         if blog_post:
-            self.render("blog_post.html", blog_posts=[blog_post])
+            if self.user:
+                self.render("blog_post.html",
+                            blog_posts=[blog_post],
+                            user_id=self.user.key().id(),
+                            liked_posts=self.user.liked_posts)
+            else:
+                self.render("blog_post.html", blog_posts=[blog_post], user_id=None)
         else:
             self.error(404)
+
+class EditBlogPostHandler(BlogHandler):
+    """Defines the edit blog functionality"""
+    def get(self, blog_id):
+        """Shows the user the edit blog page"""
+        if not self.user:
+            self.redirect("/login")
+
+        blog_post = BlogPost.get_by_id(int(blog_id))
+
+        logging.error(blog_post.subject)
+        if not blog_post:
+            self.error(404)
+
+        self.render("create_post.html", content=blog_post.content, subject=blog_post.subject)
+
+    def post(self, blog_id):
+        """Updates the post"""
+        if not self.user:
+            self.redirect("/login")
+
+        subject = self.request.get("subject")
+        content = self.request.get("content")
+
+        if not subject:
+            self.render("create_post.html", error="Please enter a subject!", content=content)
+        elif not content:
+            self.render("create_post.html", error="Please enter some content!", subject=subject)
+        else:
+            post = BlogPost.get_by_id(int(blog_id))
+            post.subject = subject
+            post.content = content
+            post.put()
+            self.redirect('/blog/{0}'.format(str(post.key().id())))
+
+class DeleteBlogPostHandler(BlogHandler):
+    """Defines the delete blog functionality"""
+    def get(self, blog_id):
+        """"Deletes the blog post if the user is authorized"""
+        if not self.user:
+            self.redirect("/login")
+
+        blog_post = BlogPost.get_by_id(int(blog_id))
+
+        #Check to make sure that the user is authorized to delete this post
+        if not blog_post or not blog_post.user_id != self.user.key().id():
+            self.redirect("/login")
+
+        blog_post.delete()
+        self.redirect("/blog")
 
 class RegistrationHandler(BlogHandler):
     """Registration Page"""
@@ -260,11 +327,10 @@ class WelcomeHandler(BlogHandler):
     """Defines the WelcomePage for the logged in user"""
     def get(self):
         """Renders the welcome.html page"""
-        #logging.error(self.user.username)
         if self.user:
             self.render("welcome.html", username=self.user.username)
-        #else:
-            #self.redirect("/login")
+        else:
+            self.redirect("/login")
 
 class LogoutHandler(BlogHandler):
     """Defines the logout functionality"""
@@ -303,11 +369,13 @@ class LoginHandler(BlogHandler):
 
 app = webapp2.WSGIApplication([("/", MainHandler),
                                (r"/blog/?", BlogFrontHandler),
-                               ("/blog/newpost", NewBlogPostHandler),
-                               (r"/blog/(\d+)", BlogPostHandler),
-                               ("/register", RegistrationHandler),
-                               ("/welcome", WelcomeHandler),
-                               ("/logout", LogoutHandler),
-                               ("/login", LoginHandler)
+                               ("/blog/newpost/?", NewBlogPostHandler),
+                               (r"/blog/(\d+)/?", BlogPostHandler),
+                               (r"/blog/edit/(\d+)/?", EditBlogPostHandler),
+                               (r"/blog/delete/(\d+)/?", DeleteBlogPostHandler),
+                               ("/register/?", RegistrationHandler),
+                               ("/welcome/?", WelcomeHandler),
+                               ("/logout/?", LogoutHandler),
+                               ("/login/?", LoginHandler)
                               ],
                               debug=True)

@@ -11,19 +11,21 @@
 
 <body>
   <div class="container">
-    <a href="/blog" class="main-title">
-      Multi-User Blog
-    </a>
-
-    <div class="login-area">
-      {% if user %}
-        {{user.username}} (<a class="login-link" href="/logout">logout</a>)
-      {% else %}
-        <a class="login-link" href="/login">login</a>
-        |
-        <a class="login-link" href="/register">register</a>
-      {% endif %}
-    </div>
+    <nav class="navbar navbar-inverse">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/blog">Multi-User Blog</a>
+        </div>
+        <ul class="nav navbar-nav navbar-right">
+          {% if user %}
+            <li><p class="navbar-text">Signed in as {{user.username}}</p></li>
+            <li><a href="/blog/starred">Starred Posts</a></li>
+            <li><a href="/logout">Logout</a></li>
+          {% else %}
+            <li><a href="/login">Login</a></li>
+            <li><a href="/register">Register</a></li>
+          {% endif %}
+        </ul>
+    </nav>
 
     <div id="content">
     {% block content %}

@@ -2,6 +2,10 @@
     display: none;
 }
 
+#newCommentBox {
+    display: none;
+}
+
 .blog-row {
     position: relative;
 }
@@ -11,7 +15,7 @@
 }
 
 .blog-date {
-    position: absolute;
+    position: relative;
     bottom:0;
     right:0;
 }
@@ -28,4 +32,14 @@
 
 .blog-content {
     white-space: pre-wrap;
+}
+
+.navbar-brand {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+}
+
+.navbar-right {
+    margin-right: 5px;
 }

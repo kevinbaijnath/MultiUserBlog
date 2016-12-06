@@ -13,6 +13,7 @@ import logging
 
 import hashlib
 import hmac
+import urllib
 import random
 import re
 from string import letters
@@ -30,6 +31,13 @@ EMAIL_RE = re.compile(r"^[\S]+@[\S]+.[\S]+$")
 
 SECRET = 'thisisasecurestringvalue'
 
+"""
+This is used as the ancestor key to get around the issue of eventual consistency in GAE
+See https://goo.gl/j2fUa4 for more info
+"""
+BLOG_KEY = db.Key.from_path('blogs', 'default')
+COMMENT_KEY  = db.Key.from_path('comments','default')
+
 class BlogPost(db.Model):
     """Defines the model for each blog post"""
     subject = db.StringProperty(required=True)
@@ -38,6 +46,15 @@ class BlogPost(db.Model):
     user_id = db.IntegerProperty(required=True)
     #Using auto_now to update the date each time the object is updated
     updatedDate = db.DateProperty(auto_now=True)
+    comments = db.ListProperty(int, default=[])
+
+class Comments(db.Model):
+    """Defines the model for each comment"""
+    content = db.TextProperty(required=True)
+    createdTime = db.DateTimeProperty(auto_now_add=True)
+    title = db.StringProperty(required=True)
+    user_id = db.IntegerProperty(required=True)
+    username = db.StringProperty(required=True)
 
 class User(db.Model):
     """Defines the model for users"""
@@ -45,7 +62,7 @@ class User(db.Model):
     passwordHash = db.StringProperty(required=True)
     email = db.StringProperty()
     createdTime = db.DateTimeProperty(auto_now_add=True)
-    liked_posts = db.ListProperty()
+    liked_posts = db.ListProperty(int, default=[])
 
     @classmethod
     def register(cls, username, password, email):
@@ -171,15 +188,21 @@ class BlogFrontHandler(BlogHandler):
     """Front page of the blog"""
     def get(self):
         """Renders multiple blog posts"""
-        blog_posts = BlogPost.gql("ORDER BY createdTime DESC").fetch(limit=10)
+
+        error = self.request.get("error")
+        logging.error(error)
+        blog_posts = BlogPost.all().ancestor(BLOG_KEY).order("-createdTime").fetch(limit=10)
 
         if blog_posts:
+            user_id = self.user.key().id if self.user else None
+            liked_posts = self.user.liked_posts if self.user else None
             self.render("blog_post.html",
                         blog_posts=blog_posts,
-                        user_id=self.user.key().id(),
-                        liked_posts=self.user.liked_posts)
+                        error=error,
+                        liked_posts=liked_posts,
+                        user_id=user_id)
         else:
-            self.render("blog_post.html", blog_posts=[])
+            self.render("blog_post.html", error=error, blog_posts=[])
 
 class NewBlogPostHandler(BlogHandler):
     """New blog post page"""
@@ -204,7 +227,10 @@ class NewBlogPostHandler(BlogHandler):
         elif not content:
             self.render("create_post.html", error="Please enter some content!", subject=subject)
         else:
-            post = BlogPost(subject=subject, content=content, user_id=self.user.key().id())
+            post = BlogPost(subject=subject,
+                            content=content,
+                            user_id=self.user.key().id(),
+                            parent=BLOG_KEY)
             post.put()
             self.redirect('/blog/{0}'.format(str(post.key().id())))
 
@@ -216,16 +242,18 @@ class BlogPostHandler(BlogHandler):
         if not blog_id.isdigit():
             self.error(404)
 
-        blog_post = BlogPost.get_by_id(int(blog_id))
+        error = self.request.get("error")
+        blog_post = BlogPost.get_by_id(int(blog_id), parent=BLOG_KEY)
 
         if blog_post:
             if self.user:
                 self.render("blog_post.html",
                             blog_posts=[blog_post],
+                            error=error,
                             user_id=self.user.key().id(),
                             liked_posts=self.user.liked_posts)
             else:
-                self.render("blog_post.html", blog_posts=[blog_post], user_id=None)
+                self.render("blog_post.html", blog_posts=[blog_post], user_id=None, error=error)
         else:
             self.error(404)
 
@@ -236,7 +264,7 @@ class EditBlogPostHandler(BlogHandler):
         if not self.user:
             self.redirect("/login")
 
-        blog_post = BlogPost.get_by_id(int(blog_id))
+        blog_post = BlogPost.get_by_id(int(blog_id), parent=BLOG_KEY)
 
         logging.error(blog_post.subject)
         if not blog_post:
@@ -257,7 +285,7 @@ class EditBlogPostHandler(BlogHandler):
         elif not content:
             self.render("create_post.html", error="Please enter some content!", subject=subject)
         else:
-            post = BlogPost.get_by_id(int(blog_id))
+            post = BlogPost.get_by_id(int(blog_id), parent=BLOG_KEY)
             post.subject = subject
             post.content = content
             post.put()
@@ -270,7 +298,7 @@ class DeleteBlogPostHandler(BlogHandler):
         if not self.user:
             self.redirect("/login")
 
-        blog_post = BlogPost.get_by_id(int(blog_id))
+        blog_post = BlogPost.get_by_id(int(blog_id), parent=BLOG_KEY)
 
         #Check to make sure that the user is authorized to delete this post
         if not blog_post or not blog_post.user_id != self.user.key().id():
@@ -367,12 +395,80 @@ class LoginHandler(BlogHandler):
             error_message = "We were unable to find a user with that username or password"
             self.render("login.html", username=username, error=error_message)
 
+class StarBlogPostHandler(BlogHandler):
+    """Defines the Blog Post like/star functionality"""
+    def get(self, blog_id):
+        """Add the blog post to the user's liked/starred posts"""
+        if not self.user:
+            self.redirect("/login")
+
+        blog_post = BlogPost.get_by_id(int(blog_id), parent=BLOG_KEY)
+        if blog_post:
+            if blog_post.user_id != self.user.key().id():
+                self.user.liked_posts.append(int(blog_id))
+                self.user.put()
+                self.redirect("/blog/"+blog_id)
+            else:
+                path = "/blog/"+blog_id+"?error="+urllib.quote("You can't like your own posts!")
+                self.redirect(path)
+        else:
+            self.error(404)
+
+class UnstarBlogPostHandler(BlogHandler):
+    """Defines the Blog Post unlike/unstar functionality"""
+    def get(self, blog_id):
+        """Remove the blog post from the user's liked/starred posts"""
+        if not self.user:
+            self.redirect("/login")
+
+        int_blog_id = int(blog_id)
+        blog_post = BlogPost.get_by_id(int(blog_id), parent=BLOG_KEY)
+        if blog_post:
+            logging.error("found blog post!")
+            if int_blog_id in self.user.liked_posts:
+                self.user.liked_posts.remove(int(blog_id))
+                self.user.put()
+                self.redirect("/blog/"+blog_id)
+            else:
+                base_path = "/blog/"+blog_id+"?error="
+                error_path = urllib.quote("You can't unstar posts that you haven't starred!")
+                self.redirect(base_path+error_path)
+        else:
+            logging.error("coulnd't find blog post")
+            self.error(404)
+
+class StarredBlogPostHandler(BlogHandler):
+    """Defines the Starred Post functionality"""
+    def get(self):
+        """Displays all of the users starred posts"""
+        if not self.user:
+            self.redirect("/login")
+
+        blog_posts = []
+        for blog_id in self.user.liked_posts:
+            blog_post = BlogPost.get_by_id(int(blog_id), parent=BLOG_KEY)
+            if blog_post:
+                blog_posts.append(blog_post)
+
+        self.render("blog_post.html",
+                    blog_posts=blog_posts,
+                    user_id=self.user.key().id(),
+                    liked_posts=self.user.liked_posts)
+
+class NewCommentHandler(BlogHandler):
+    """Defines the New Comment functionality"""
+    def get(self):
+        """Defines the get functionality"""
+
 app = webapp2.WSGIApplication([("/", MainHandler),
                                (r"/blog/?", BlogFrontHandler),
                                ("/blog/newpost/?", NewBlogPostHandler),
                                (r"/blog/(\d+)/?", BlogPostHandler),
                                (r"/blog/edit/(\d+)/?", EditBlogPostHandler),
                                (r"/blog/delete/(\d+)/?", DeleteBlogPostHandler),
+                               (r"/blog/star/(\d+)/?", StarBlogPostHandler),
+                               (r"/blog/unstar/(\d+)/?", UnstarBlogPostHandler),
+                               ("/blog/starred", StarredBlogPostHandler),
                                ("/register/?", RegistrationHandler),
                                ("/welcome/?", WelcomeHandler),
                                ("/logout/?", LogoutHandler),

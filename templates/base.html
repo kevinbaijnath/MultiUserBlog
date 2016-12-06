@@ -15,6 +15,11 @@
         <div class="navbar-header">
           <a class="navbar-brand" href="/blog">Multi-User Blog</a>
         </div>
+        <ul class="nav navbar-nav navbar-left">
+          {% if user %}
+            <li><a href="/blog/newpost">Post</a></li>
+          {% endif %}
+        </ul>
         <ul class="nav navbar-nav navbar-right">
           {% if user %}
             <li><p class="navbar-text">Signed in as {{user.username}}</p></li>

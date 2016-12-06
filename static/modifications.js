@@ -13,4 +13,14 @@ $( document ).ready(function() {
             $("#showCommentForm").text("Comment");
         }
     });
+    $("#showComments").click(function(){
+        $("#hideComments").show()
+        $("#commentBox").show()
+        $("#showComments").hide()
+    });
+    $("#hideComments").click(function(){
+        $("#showComments").show()
+        $("#commentBox").hide()
+        $("#hideComments").hide()
+    });
 });

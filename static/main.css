@@ -1,8 +1,4 @@
-#error {
-    display: none;
-}
-
-#newCommentBox {
+#error,#newCommentBox,#hideComments,#commentBox {
     display: none;
 }
 
@@ -42,4 +38,16 @@
 
 .navbar-right {
     margin-right: 5px;
+}
+
+.offset-left {
+    margin-left: 15px;
+}
+
+#newCommentBox {
+    width: 50%;
+}
+
+#comment_content, #comment_title {
+    width: 100%;
 }

@@ -42,46 +42,53 @@
             <div class="row">
                 <div class="col-md-12 col-lg-12">
                     <div class="pull-right">
-                        <a id="showComments" href="#">Show ???? comments</a>
-                        <a id="hideComments" href="#">Hide ???? comments</a>
+                        <button id="showComments" class="btn btn-default">Show {{comments[loop.index0]|length}} comments</button>
+                        <button id="hideComments" class="btn btn-default">Hide {{comments[loop.index0]|length}} comments</button>
                     </div>
                 </div>
             </div>
-            <div>
-                <div class="row">
-                    <div class="col-md-6 col-lg-6">
-
-                    </div>
-                    <div class="col-md-6 col-lg-6">
-
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12 col-lg-12">
-
-                    </div>
-                </div>
+            <div id="commentBox">
+                {% for comment in comments[loop.index0] %}
+                    {% if comment %}
+                        <div>
+                            <div class="row">
+                                <div class="col-md-12 col-lg-12">
+                                    {{comment.content}}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-1 col-lg-1">
+                                    {% if user_id and user_id == comment.user_id %}
+                                        <a href="/blog/deletecomment/{{post.key().id()}}/{{comment.key().id()}}">Delete</a>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-11 col-lg-11">
+                                    {{comment.username}} - {{comment.createdTime.strftime("%B %d,%Y %I:%M %p")}}
+                                </div>
+                            </div>
+                        </div>
+                        <br>
+                    {% endif %}
+                {% endfor %}
             </div>
+            <div class="offset-left">
             {% if user_id  %}
+                <div class="row" id="newCommentBox">
+                    <div class="well well-sm">
+                        <form action="/blog/newcomment/{{post.key().id()}}" method="post">
+                            <div class="form-group">
+                                <textarea id="comment_content" name="comment_content" placeholder="Content" rows=5 required>{{comment_content}}</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-default">Submit Comment</button>
+                        </form>
+                    </div>
+                </div>
                 <div class="row">
                     {% if user_id == post.user_id %}
                     <a class="btn btn-default" href="/blog/edit/{{post.key().id()}}" role="button">Edit</a>
                     <button class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Delete</button>
                     {% endif %}
                     <button id="showCommentForm" class="btn btn-default">Comment</button>
-                </div>
-                <div class="row" id="newCommentBox">
-                    <form action="/blog/newcomment/{{post.key().id()}}" method="post">
-                        <div class="form-group">
-                            <label for="comment_title">Title</label>
-                            <input type="text" name="comment_title" value="{{comment_title}}">
-                        </div>
-                        <div class="form-group">
-                            <label for="comment_content">Comment Content</label>
-                            <textarea name="comment_content">{{comment_content}}</textarea>
-                        </div>
-                        <button type="submit" class="btn btn-default">Submit Comment</button>
-                    </form>
                 </div>
                 {% if user_id == post.user_id %}
                 <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModal">
@@ -103,6 +110,7 @@
                 </div>
                 {% endif %}
             {% endif %}
+            </div>
         {% endfor %}
         
     {% endif %}

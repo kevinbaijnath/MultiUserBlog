@@ -36,7 +36,7 @@ This is used as the ancestor key to get around the issue of eventual consistency
 See https://goo.gl/j2fUa4 for more info
 """
 BLOG_KEY = db.Key.from_path('blogs', 'default')
-COMMENT_KEY  = db.Key.from_path('comments','default')
+COMMENT_KEY = db.Key.from_path('comments', 'default')
 
 class BlogPost(db.Model):
     """Defines the model for each blog post"""
@@ -46,13 +46,12 @@ class BlogPost(db.Model):
     user_id = db.IntegerProperty(required=True)
     #Using auto_now to update the date each time the object is updated
     updatedDate = db.DateProperty(auto_now=True)
-    comments = db.ListProperty(int, default=[])
+    comment_ids = db.ListProperty(int, default=[])
 
-class Comments(db.Model):
+class Comment(db.Model):
     """Defines the model for each comment"""
     content = db.TextProperty(required=True)
     createdTime = db.DateTimeProperty(auto_now_add=True)
-    title = db.StringProperty(required=True)
     user_id = db.IntegerProperty(required=True)
     username = db.StringProperty(required=True)
 
@@ -192,17 +191,21 @@ class BlogFrontHandler(BlogHandler):
         error = self.request.get("error")
         logging.error(error)
         blog_posts = BlogPost.all().ancestor(BLOG_KEY).order("-createdTime").fetch(limit=10)
-
+        comments = []
         if blog_posts:
-            user_id = self.user.key().id if self.user else None
+            user_id = self.user.key().id() if self.user else None
             liked_posts = self.user.liked_posts if self.user else None
+            for blog_post in blog_posts:
+                comments.append(Comment.get_by_id(blog_post.comment_ids, parent=COMMENT_KEY))
+
             self.render("blog_post.html",
                         blog_posts=blog_posts,
+                        comments=comments,
                         error=error,
                         liked_posts=liked_posts,
                         user_id=user_id)
         else:
-            self.render("blog_post.html", error=error, blog_posts=[])
+            self.render("blog_post.html", error=error, blog_posts=[], comments=[])
 
 class NewBlogPostHandler(BlogHandler):
     """New blog post page"""
@@ -244,16 +247,21 @@ class BlogPostHandler(BlogHandler):
 
         error = self.request.get("error")
         blog_post = BlogPost.get_by_id(int(blog_id), parent=BLOG_KEY)
-
+        comments = Comment.get_by_id(blog_post.comment_ids, parent=COMMENT_KEY)
         if blog_post:
             if self.user:
                 self.render("blog_post.html",
                             blog_posts=[blog_post],
+                            comments=[comments],
                             error=error,
                             user_id=self.user.key().id(),
                             liked_posts=self.user.liked_posts)
             else:
-                self.render("blog_post.html", blog_posts=[blog_post], user_id=None, error=error)
+                self.render("blog_post.html",
+                            blog_posts=[blog_post],
+                            comments=[comments],
+                            user_id=None,
+                            error=error)
         else:
             self.error(404)
 
@@ -303,6 +311,12 @@ class DeleteBlogPostHandler(BlogHandler):
         #Check to make sure that the user is authorized to delete this post
         if not blog_post or not blog_post.user_id != self.user.key().id():
             self.redirect("/login")
+
+        #We need to remove the comments as well to preven them from being orphaned
+        comments = Comment.get_by_id(blog_post.comment_ids, parent=COMMENT_KEY)
+        for comment in comments:
+            if comment:
+                comment.delete()
 
         blog_post.delete()
         self.redirect("/blog")
@@ -422,11 +436,11 @@ class UnstarBlogPostHandler(BlogHandler):
             self.redirect("/login")
 
         int_blog_id = int(blog_id)
-        blog_post = BlogPost.get_by_id(int(blog_id), parent=BLOG_KEY)
+        blog_post = BlogPost.get_by_id(int_blog_id, parent=BLOG_KEY)
         if blog_post:
             logging.error("found blog post!")
             if int_blog_id in self.user.liked_posts:
-                self.user.liked_posts.remove(int(blog_id))
+                self.user.liked_posts.remove(int_blog_id)
                 self.user.put()
                 self.redirect("/blog/"+blog_id)
             else:
@@ -445,20 +459,57 @@ class StarredBlogPostHandler(BlogHandler):
             self.redirect("/login")
 
         blog_posts = []
+        comments = []
         for blog_id in self.user.liked_posts:
             blog_post = BlogPost.get_by_id(int(blog_id), parent=BLOG_KEY)
             if blog_post:
                 blog_posts.append(blog_post)
+                comments.append(Comment.get_by_id(blog_post.comment_ids), parent=COMMENT_KEY)
 
         self.render("blog_post.html",
                     blog_posts=blog_posts,
+                    comments=comments,
                     user_id=self.user.key().id(),
                     liked_posts=self.user.liked_posts)
 
 class NewCommentHandler(BlogHandler):
     """Defines the New Comment functionality"""
-    def get(self):
-        """Defines the get functionality"""
+    def post(self, blog_id):
+        """Defines the creating comment functionality"""
+        blog_post = BlogPost.get_by_id(int(blog_id), parent=BLOG_KEY)
+        content = self.request.get("comment_content")
+        if self.user and blog_post:
+            comment = Comment(content=content,
+                              user_id=self.user.key().id(),
+                              username=self.user.username,
+                              parent=COMMENT_KEY)
+            comment.put()
+            blog_post.comment_ids.append(comment.key().id())
+            blog_post.put()
+            self.redirect("/blog/{0}".format(blog_id))
+        else:
+            self.error(404)
+
+class DeleteCommentHandler(BlogHandler):
+    """Defines the Delete Comment functionality"""
+    def get(self, blog_id, comment_id):
+        """Removes the comment from the blog post"""
+        blog_post = BlogPost.get_by_id(int(blog_id), parent=BLOG_KEY)
+        comment = Comment.get_by_id(int(comment_id), parent=COMMENT_KEY)
+
+        if not (blog_post and comment):
+            self.error(404)
+
+        int_comment_id = int(comment_id)
+
+        if not int_comment_id in blog_post.comment_ids:
+            self.error(404)
+
+        blog_post.comment_ids.remove(int_comment_id)
+        blog_post.put()
+        comment.delete()
+
+        self.redirect("/blog/{0}".format(blog_id))
 
 app = webapp2.WSGIApplication([("/", MainHandler),
                                (r"/blog/?", BlogFrontHandler),
@@ -469,6 +520,8 @@ app = webapp2.WSGIApplication([("/", MainHandler),
                                (r"/blog/star/(\d+)/?", StarBlogPostHandler),
                                (r"/blog/unstar/(\d+)/?", UnstarBlogPostHandler),
                                ("/blog/starred", StarredBlogPostHandler),
+                               (r"/blog/newcomment/(\d+)/?", NewCommentHandler),
+                               (r"/blog/deletecomment/(\d+)/(\d+)/?", DeleteCommentHandler),
                                ("/register/?", RegistrationHandler),
                                ("/welcome/?", WelcomeHandler),
                                ("/logout/?", LogoutHandler),

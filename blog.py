@@ -464,7 +464,7 @@ class StarredBlogPostHandler(BlogHandler):
             blog_post = BlogPost.get_by_id(int(blog_id), parent=BLOG_KEY)
             if blog_post:
                 blog_posts.append(blog_post)
-                comments.append(Comment.get_by_id(blog_post.comment_ids), parent=COMMENT_KEY)
+                comments.append(Comment.get_by_id(blog_post.comment_ids, parent=COMMENT_KEY))
 
         self.render("blog_post.html",
                     blog_posts=blog_posts,

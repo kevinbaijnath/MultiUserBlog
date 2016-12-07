@@ -397,20 +397,21 @@ class LoginHandler(BlogHandler):
 
         error_username = not USER_RE.match(username)
         error_password = not PASSWORD_RE.match(password)
-
-        if error_username or error_password:
-            if error_username:
-                error_message = "Your username must be alphanumeric between 3 and 20 characters"
-            else:
-                error_message = "Your password must be between 3 and 20 characters"
-
         user = User.login_user(username, password)
-        if user:
+
+        if error_username or error_password or not user:
+            if error_username:
+                error_message = "You did not enter a valid username"
+            elif error_password:
+                error_message = "You did not enter a valid password"
+            elif not user:
+                error_message = "We were unable to find a user with that username or password"
+            else:
+                error_message = "Something went wrong!"
+            self.render("login.html", username=username, error=error_message)
+        else:
             self.login(user)
             self.redirect("/welcome")
-        else:
-            error_message = "We were unable to find a user with that username or password"
-            self.render("login.html", username=username, error=error_message)
 
 class StarBlogPostHandler(BlogHandler):
     """Defines the Blog Post like/star functionality"""

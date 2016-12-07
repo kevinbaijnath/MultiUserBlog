@@ -3,113 +3,115 @@
 {% block content %}
     {% if blog_posts %}
         {% for post in blog_posts %}
-            <div class="row blog-row">
-                <div class="col-md-9 col-lg-9">
-                    <h2 class="blog-subject">{{ post.subject }}</h2>
-                </div>
-                <div class="col-md-2 col-lg-2 blog-date">
-                    <h4>{{ post.updatedDate.strftime("%B %d, %Y") }}</h4>
-                </div>
-                {% if user_id and user_id != post.user_id %}
-                <div class="col-md-1 col-lg-1 blog-star">
-                    {% if post.key().id() in liked_posts %}
-                    <a class="btn" href="/blog/unstar/{{post.key().id()}}" role="button">
-                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
-                    </a>
-                    {% else %}
-                    <a class="btn" href="/blog/star/{{post.key().id()}}" role="button">
-                        <span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>
-                    </a>
-                    {% endif %}
-                </div>
-                {% endif %}
-            </div>
-            <div class="row">
-                <div class="col-md-12 col-lg-12">
-                    <hr class="blog-divider">
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12 col-lg-12 blog-content">
-                    <p>{{ post.content }}</p>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12 col-lg-12">
-                    <hr class="blog-divider">
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12 col-lg-12">
-                    <div class="pull-right">
-                        <button id="showComments" class="btn btn-primary">Show {{comments[loop.index0]|length}} comments</button>
-                        <button id="hideComments" class="btn btn-primary">Hide {{comments[loop.index0]|length}} comments</button>
+            <div class="post">
+                <div class="row blog-row">
+                    <div class="col-md-9 col-lg-9">
+                        <h2 class="blog-subject">{{ post.subject }}</h2>
                     </div>
-                </div>
-            </div>
-            <div id="commentBox">
-                {% for comment in comments[loop.index0] %}
-                    {% if comment %}
-                        <div class="individual-comments">
-                            <div class="row">
-                                <div class="col-md-12 col-lg-12">
-                                    {{comment.content}}
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-1 col-lg-1">
-                                    {% if user_id and user_id == comment.user_id %}
-                                        <a href="/blog/deletecomment/{{post.key().id()}}/{{comment.key().id()}}">Delete</a>
-                                    {% endif %}
-                                </div>
-                                <div class="col-md-11 col-lg-11">
-                                    {{comment.username}} - {{comment.createdTime.strftime("%B %d,%Y %I:%M %p")}}
-                                </div>
-                            </div>
-                        </div>
-                        <br>
+                    <div class="col-md-2 col-lg-2 blog-date">
+                        <h4>{{ post.updatedDate.strftime("%B %d, %Y") }}</h4>
+                    </div>
+                    {% if user_id and user_id != post.user_id %}
+                    <div class="col-md-1 col-lg-1 blog-star">
+                        {% if post.key().id() in liked_posts %}
+                        <a class="btn" href="/blog/unstar/{{post.key().id()}}" role="button">
+                            <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                        </a>
+                        {% else %}
+                        <a class="btn" href="/blog/star/{{post.key().id()}}" role="button">
+                            <span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>
+                        </a>
+                        {% endif %}
+                    </div>
                     {% endif %}
-                {% endfor %}
-            </div>
-            <div class="offset-left">
-            {% if user_id  %}
-                <div class="row" id="newCommentBox">
-                    <div class="well well-sm">
-                        <form action="/blog/newcomment/{{post.key().id()}}" method="post">
-                            <div class="form-group">
-                                <textarea id="comment_content" name="comment_content" placeholder="Content" rows=5 required>{{comment_content}}</textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Submit Comment</button>
-                        </form>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+                        <hr class="blog-divider">
                     </div>
                 </div>
                 <div class="row">
-                    <button id="showCommentForm" class="btn btn-primary">Comment</button>
-                    {% if user_id == post.user_id %}
-                    <a class="btn btn-primary" href="/blog/edit/{{post.key().id()}}" role="button">Edit Post</a>
-                    <button class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Delete Post</button>
-                    {% endif %}
+                    <div class="col-md-12 col-lg-12 blog-content">
+                        <p>{{ post.content }}</p>
+                    </div>
                 </div>
-                {% if user_id == post.user_id %}
-                <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModal">
-                    <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                            <h4 class="modal-title" id="myModalLabel">Delete post {{ post.subject }}?</h4>
-                        </div>
-                        <div class="modal-body">
-                            Are you sure you want to delete this post?  This action can't be undone!
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-                            <a class="btn btn-danger" href="/blog/delete/{{post.key().id()}}" role="button">Delete</a>
-                        </div>
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+                        <hr class="blog-divider">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+                        <div class="pull-right">
+                            <button class="btn btn-primary show-comments">Show {{comments[loop.index0]|length}} comments</button>
+                            <button class="btn btn-primary hide-comments">Hide {{comments[loop.index0]|length}} comments</button>
                         </div>
                     </div>
                 </div>
+                <div class="comment-box">
+                    {% for comment in comments[loop.index0] %}
+                        {% if comment %}
+                            <div class="individual-comments">
+                                <div class="row">
+                                    <div class="col-md-12 col-lg-12">
+                                        {{comment.content}}
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-1 col-lg-1">
+                                        {% if user_id and user_id == comment.user_id %}
+                                            <a href="/blog/deletecomment/{{post.key().id()}}/{{comment.key().id()}}">Delete</a>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-11 col-lg-11">
+                                        {{comment.username}} - {{comment.createdTime.strftime("%B %d,%Y %I:%M %p")}}
+                                    </div>
+                                </div>
+                            </div>
+                            <br>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="offset-left">
+                {% if user_id  %}
+                    <div class="row new-comment-box">
+                        <div class="well well-sm">
+                            <form action="/blog/newcomment/{{post.key().id()}}" method="post">
+                                <div class="form-group">
+                                    <textarea id="comment_content" name="comment_content" placeholder="Content" rows=5 required>{{comment_content}}</textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Submit Comment</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <button class="btn btn-primary show-new-comment-form">Comment</button>
+                        {% if user_id == post.user_id %}
+                        <a class="btn btn-primary" href="/blog/edit/{{post.key().id()}}" role="button">Edit Post</a>
+                        <button class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Delete Post</button>
+                        {% endif %}
+                    </div>
+                    {% if user_id == post.user_id %}
+                    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModal">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="myModalLabel">Delete post {{ post.subject }}?</h4>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to delete this post?  This action can't be undone!
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                                <a class="btn btn-danger" href="/blog/delete/{{post.key().id()}}" role="button">Delete</a>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 {% endif %}
-            {% endif %}
+                </div>
             </div>
         {% endfor %}
         

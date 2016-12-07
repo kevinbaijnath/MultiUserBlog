@@ -278,7 +278,10 @@ class EditBlogPostHandler(BlogHandler):
         if not blog_post:
             self.error(404)
 
-        self.render("create_post.html", content=blog_post.content, subject=blog_post.subject)
+        self.render("create_post.html",
+                    content=blog_post.content,
+                    subject=blog_post.subject,
+                    blog_id=blog_id)
 
     def post(self, blog_id):
         """Updates the post"""

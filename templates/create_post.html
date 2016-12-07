@@ -14,6 +14,9 @@
             <label for="content">Content</label>        
             <textarea class="form-control" id="content" name="content" rows="15" >{{content}}</textarea>
         </textarea>
+        {% if blog_id %}
+            <a class="btn btn-default" href="/blog/{{blog_id}}" role="button">Cancel</a>
+        {% endif %}
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 </div>

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h3 class="text-center">
+<h3 class="text-left">
     Create A New Blog Post
 </h3>
 <div class="well well-lg">
@@ -15,7 +15,7 @@
             <textarea class="form-control" id="content" name="content" rows="15" >{{content}}</textarea>
         </textarea>
         {% if blog_id %}
-            <a class="btn btn-default" href="/blog/{{blog_id}}" role="button">Cancel</a>
+            <a class="btn btn-primary" href="/blog/{{blog_id}}" role="button">Cancel</a>
         {% endif %}
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>

@@ -356,17 +356,16 @@ class RegistrationHandler(BlogHandler):
                 error_message = "The verify password did not match the password you typed in"
             else:
                 error_message = "The email that you entered was not a valid email"
-
-            self.render("register.html", username=username, email=email, error=error_message)
-
-        if User.find_by_username(username):
-            error_message = "Someone already has this username"
             self.render("register.html", username=username, email=email, error=error_message)
         else:
-            newuser = User.register(username, password, email)
-            newuser.put()
-            self.login(newuser)
-            self.redirect("/welcome")
+            if User.find_by_username(username):
+                error_message = "Someone already has this username!"
+                self.render("register.html", username=username, email=email, error=error_message)
+            else:
+                newuser = User.register(username, password, email)
+                newuser.put()
+                self.login(newuser)
+                self.redirect("/welcome")
 
 class WelcomeHandler(BlogHandler):
     """Defines the WelcomePage for the logged in user"""

@@ -10,6 +10,7 @@ class BlogFrontHandler(BlogHandler):
         """Renders multiple blog posts"""
 
         error = self.request.get("error")
+        #Fetch the top 10 most recently created blog posts from the DB
         blog_posts = BlogPost.all().ancestor(BLOG_KEY).order("-createdTime").fetch(limit=10)
         comments = []
         creators = []

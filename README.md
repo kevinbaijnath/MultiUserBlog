@@ -11,6 +11,8 @@ Users are able to
 
 Account details are stored securely in the GAE Datastore (no plaintext passwords)
 
+If you would like to see a sample of what the site looks like, check [here](https://future-badge-151020.appspot.com)
+
 ## Getting Started
 
 ### Prerequisites

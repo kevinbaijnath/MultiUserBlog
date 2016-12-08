@@ -1,0 +1,24 @@
+<div class="comment-box">
+    {% for comment in comments[loop.index0] %}
+        {% if comment %}
+            <div class="individual-comments">
+                <div class="row">
+                    <div class="col-md-12 col-lg-12">
+                        {{comment.content}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-1 col-lg-1">
+                        {% if user_id and user_id == comment.user_id %}
+                            <a href="/blog/deletecomment/{{post.key().id()}}/{{comment.key().id()}}">Delete</a>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-11 col-lg-11">
+                        {{comment.username}} - {{comment.createdTime.strftime("%B %d,%Y %I:%M %p")}}
+                    </div>
+                </div>
+            </div>
+            <br>
+        {% endif %}
+    {% endfor %}
+</div>

@@ -1,23 +1,23 @@
 """
-Contains the WebAppHandlers for the MultiUserBlog
+Contains the WebApphandlers for the MultiUserBlog
 """
 import webapp2
 
-from src.handlers.mainhandler import MainHandler
-from src.handlers.blogfronthandler import BlogFrontHandler
-from src.handlers.newblogposthandler import NewBlogPostHandler
-from src.handlers.blogposthandler import BlogPostHandler
-from src.handlers.editblogposthandler import EditBlogPostHandler
-from src.handlers.deleteblogposthandler import DeleteBlogPostHandler
-from src.handlers.starblogposthandler import StarBlogPostHandler
-from src.handlers.unstarblogposthandler import UnstarBlogPostHandler
-from src.handlers.starredblogposthandler import StarredBlogPostHandler
-from src.handlers.newcommenthandler import NewCommentHandler
-from src.handlers.deletecommenthandler import DeleteCommentHandler
-from src.handlers.registrationhandler import RegistrationHandler
-from src.handlers.welcomehandler import WelcomeHandler
-from src.handlers.logouthandler import LogoutHandler
-from src.handlers.loginhandler import LoginHandler
+from handlers.mainhandler import MainHandler
+from handlers.blogfronthandler import BlogFrontHandler
+from handlers.newblogposthandler import NewBlogPostHandler
+from handlers.blogposthandler import BlogPostHandler
+from handlers.editblogposthandler import EditBlogPostHandler
+from handlers.deleteblogposthandler import DeleteBlogPostHandler
+from handlers.starblogposthandler import StarBlogPostHandler
+from handlers.unstarblogposthandler import UnstarBlogPostHandler
+from handlers.starredblogposthandler import StarredBlogPostHandler
+from handlers.newcommenthandler import NewCommentHandler
+from handlers.deletecommenthandler import DeleteCommentHandler
+from handlers.registrationhandler import RegistrationHandler
+from handlers.welcomehandler import WelcomeHandler
+from handlers.logouthandler import LogoutHandler
+from handlers.loginhandler import LoginHandler
 
 app = webapp2.WSGIApplication([("/", MainHandler),
                                (r"/blog/?", BlogFrontHandler),

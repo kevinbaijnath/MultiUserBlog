@@ -1,4 +1,3 @@
-application: multiuserblog
 runtime: python27
 api_version: 1
 threadsafe: true
@@ -6,12 +5,8 @@ threadsafe: true
 handlers:
 - url: /static
   static_dir: static
-
-- url: /stylesheets
-  static_dir: stylesheets
-
 - url: /.*
-  script: blog.app
+  script: src.blog.app
 
 libraries:
 - name: jinja2

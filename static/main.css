@@ -9,21 +9,6 @@
     font-size: 30px;
 }
 
-/* 
-Used to override the default bootstrap button style 
-See: https://stackoverflow.com/questions/28261287/how-to-change-btn-color-in-bootstrap
-*/
-.btn-success,
-.btn-success:hover,
-.btn-success:active,
-.btn-success:visited,
-.btn-success:focus
-{
-    background-color: #7E8F7C;
-    border-color: #7E8F7C;
-    background-image: none;
-}
-
 button[type='submit'] {
     margin-top: 15px;
 }

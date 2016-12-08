@@ -192,17 +192,20 @@ class BlogFrontHandler(BlogHandler):
         logging.error(error)
         blog_posts = BlogPost.all().ancestor(BLOG_KEY).order("-createdTime").fetch(limit=10)
         comments = []
+        creators = []
         if blog_posts:
             user_id = self.user.key().id() if self.user else None
             liked_posts = self.user.liked_posts if self.user else None
             for blog_post in blog_posts:
                 comments.append(Comment.get_by_id(blog_post.comment_ids, parent=COMMENT_KEY))
+                creators.append(User.get_by_id(blog_post.user_id).username)
 
             self.render("blog_post.html",
                         blog_posts=blog_posts,
                         comments=comments,
                         error=error,
                         liked_posts=liked_posts,
+                        creators=creators,
                         user_id=user_id)
         else:
             self.render("blog_post.html", error=error, blog_posts=[], comments=[])
@@ -255,6 +258,7 @@ class BlogPostHandler(BlogHandler):
                             comments=[comments],
                             error=error,
                             user_id=self.user.key().id(),
+                            creators=[User.get_by_id(blog_post.user_id).username],
                             liked_posts=self.user.liked_posts)
             else:
                 self.render("blog_post.html",
@@ -463,16 +467,19 @@ class StarredBlogPostHandler(BlogHandler):
 
         blog_posts = []
         comments = []
+        creators = []
         for blog_id in self.user.liked_posts:
             blog_post = BlogPost.get_by_id(int(blog_id), parent=BLOG_KEY)
             if blog_post:
                 blog_posts.append(blog_post)
                 comments.append(Comment.get_by_id(blog_post.comment_ids, parent=COMMENT_KEY))
+                creators.append(User.get_by_id(blog_post.user_id).username)
 
         self.render("blog_post.html",
                     blog_posts=blog_posts,
                     comments=comments,
                     user_id=self.user.key().id(),
+                    creators=creators,
                     liked_posts=self.user.liked_posts)
 
 class NewCommentHandler(BlogHandler):

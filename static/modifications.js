@@ -4,33 +4,30 @@ $( document ).ready(function() {
             $("#error").slideUp(1000);
         });
     }
-    $(".post").find(".show-new-comment-form").click(function(){
-        item = $(".post")
-        item.find(".show-new-comment-form").click(function(){
-            if (item.find(".new-comment-box").is(':hidden')){
-                item.find(".new-comment-box").show();
-                item.find(".show-new-comment-form").text("Cancel")
+    $(".post").each(function(index, element){
+        $(element).find(".show-new-comment-form").click(function(){
+            if ($(element).find(".new-comment-box").is(':hidden')){
+                $(element).find(".new-comment-box").show();
+                $(element).find(".show-new-comment-form").text("Cancel")
             }else{
-                item.find(".new-comment-box").hide();
-                item.find(".show-new-comment-form").text("Comment")
+                $(element).find(".new-comment-box").hide();
+                $(element).find(".show-new-comment-form").text("Comment")
             }
-        })
-    });
+        });
 
-    $(".post").find(".show-comments").click(function(){
-        item = $(".post")
-        item.find(".hide-comments").show()
-        item.find(".comment-box").show()
-        item.find(".show-comments").hide()
-    });
+        $(element).find(".show-comments").click(function(){
+            $(element).find(".hide-comments").show()
+            $(element).find(".comment-box").show()
+            $(element).find(".show-comments").hide()
+        });
 
-    $(".post").find(".hide-comments").click(function(){
-        item = $(".post")
-        item.find(".show-comments").show()
-        item.find(".comment-box").hide()
-        item.find(".hide-comments").hide()
+        $(element).find(".hide-comments").click(function(){
+            $(element).find(".show-comments").show()
+            $(element).find(".comment-box").hide()
+            $(element).find(".hide-comments").hide()
+        });
     });
-
+    
     // $("#showCommentForm").click(function(){
     //     if($("#newCommentBox").is(':hidden')){
     //         $("#newCommentBox").show();

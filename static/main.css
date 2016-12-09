@@ -25,6 +25,7 @@ h3 {
 
 #error,
 .new-comment-box,
+.edit-comment-box,
 .hide-comments,
 .comment-box {
     display: none;
@@ -75,7 +76,7 @@ h3 {
     width: 50%;
 }
 
-#comment_content, #comment_title {
+#comment_content, #comment_title, textarea {
     width: 100%;
 }
 
@@ -87,3 +88,7 @@ h3 {
     border-bottom: 1px solid #d3d3d3;
 }
 
+.btn-link {
+    padding-top: 0px;
+    padding-bottom: 0px;
+}

@@ -15,6 +15,21 @@ $( document ).ready(function() {
             }
         });
 
+        $(element).find(".individual-comments").each(function(inner_index, inner_element){
+            $(inner_element).find(".show-edit-comment-form").click(function(){
+                if ($(inner_element).find(".edit-comment-box").is(':hidden')){
+                    $(inner_element).find(".edit-comment-box").show();
+                    $(inner_element).find(".edit_comment_content").val($(inner_element).find(".comment-content").text().trim())
+                    $(inner_element).find(".show-edit-comment-form").text("Cancel")
+                }else{
+                    $(inner_element).find(".edit-comment-box").hide();
+                    $(inner_element).find(".edit_comment_content").val("")
+                    $(inner_element).find(".show-edit-comment-form").text("Edit")
+                }
+            });
+        });
+        
+
         $(element).find(".show-comments").click(function(){
             $(element).find(".hide-comments").show()
             $(element).find(".comment-box").show()

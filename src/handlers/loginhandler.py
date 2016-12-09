@@ -24,7 +24,8 @@ class LoginHandler(BlogHandler):
             elif error_password:
                 error_message = "You did not enter a valid password"
             elif not user:
-                error_message = "We were unable to find a user with that username or password"
+                error_message = """Unable to find a user
+                                   with that username or password"""
             else:
                 error_message = "Something went wrong!"
             self.render("login.html", username=username, error=error_message)

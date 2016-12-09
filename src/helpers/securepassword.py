@@ -2,6 +2,7 @@ import hashlib
 import random
 from string import letters
 
+
 class SecurePassword(object):
     """Secure Password implementation"""
     @classmethod
@@ -19,6 +20,6 @@ class SecurePassword(object):
 
     @classmethod
     def valid_password(cls, name, password, new_hash):
-        """Checks to see if the input hash is equal to the user password hash"""
+        """Checks to see if input hash is equal to the user password hash"""
         salt = new_hash.split(',')[0]
         return new_hash == cls.make_password_hash(name, password, salt)

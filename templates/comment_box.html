@@ -3,20 +3,36 @@
         {% if comment %}
             <div class="individual-comments">
                 <div class="row">
-                    <div class="col-md-12 col-lg-12">
+                    <div class="col-md-12 col-lg-12 comment-content">
                         {{comment.content}}
                     </div>
                 </div>
+                <br>
                 <div class="row">
-                    <div class="col-md-1 col-lg-1">
                         {% if user_id and user_id == comment.user_id %}
-                            <a href="/blog/deletecomment/{{post.key().id()}}/{{comment.key().id()}}">Delete</a>
+                            <div class="col-md-1 col-lg-1">
+                                <button class="btn btn-link show-edit-comment-form">Edit</button>
+                            </div>
+                            <div class="col-md-1 col-lg-1">
+                                <a href="/blog/deletecomment/{{post.key().id()}}/{{comment.key().id()}}">Delete</a>
+                            </div>
                         {% endif %}
-                    </div>
-                    <div class="col-md-11 col-lg-11">
+                    <div class="col-md-10 col-lg-10">
                         {{comment.username}} - {{comment.createdTime.strftime("%B %d,%Y %I:%M %p")}}
                     </div>
                 </div>
+                {% if user_id and user_id == comment.user_id %}
+                <div class="row edit-comment-box">
+                    <div class="well well-sm">
+                        <form action="/blog/editcomment/{{post.key().id()}}/{{comment.key().id()}}" method="post">
+                            <div class="form-group">
+                                <textarea class="edit_comment_content" name="edit_comment_content" rows=5 required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Edited Comment</button>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
             </div>
             <br>
         {% endif %}

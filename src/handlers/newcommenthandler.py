@@ -3,6 +3,7 @@ from ..models.blogpost import BlogPost
 from ..models.comment import Comment
 from ..constants import BLOG_KEY, COMMENT_KEY
 
+
 class NewCommentHandler(BlogHandler):
     """Defines the New Comment functionality"""
     def post(self, blog_id):
@@ -20,3 +21,4 @@ class NewCommentHandler(BlogHandler):
             self.redirect("/blog/{0}".format(blog_id))
         else:
             self.error(404)
+            self.render("404.html")

@@ -1,5 +1,6 @@
 from ..handlers.bloghandler import BlogHandler
 
+
 class LogoutHandler(BlogHandler):
     """Defines the logout functionality"""
     def get(self):

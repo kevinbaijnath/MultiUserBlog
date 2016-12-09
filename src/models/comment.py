@@ -1,5 +1,6 @@
 from google.appengine.ext import db
 
+
 class Comment(db.Model):
     """Defines the model for each comment"""
     content = db.TextProperty(required=True)

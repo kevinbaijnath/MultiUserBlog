@@ -1,12 +1,14 @@
 import hmac
 SECRET = 'thisisasecurestringvalue'
 
+
 class SecureString(object):
     """Secure String implementation"""
     @classmethod
     def make_secure_val(cls, plain_string):
         """Returns a secure string from an input string"""
-        return "%s|%s" % (plain_string, hmac.new(SECRET, plain_string).hexdigest())
+        return "%s|%s" % (plain_string,
+                          hmac.new(SECRET, plain_string).hexdigest())
 
     @classmethod
     def check_secure_val(cls, secure_val):
@@ -21,5 +23,5 @@ class SecureString(object):
 
     @classmethod
     def is_valid_cookie(cls, inp_string):
-        """Takes in a string and checks to see if it is a valid secure string"""
+        """Checks to see if input string is a valid secure string"""
         return inp_string and cls.check_secure_val(inp_string)

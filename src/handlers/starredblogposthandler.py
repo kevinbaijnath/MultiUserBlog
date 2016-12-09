@@ -4,12 +4,13 @@ from ..models.comment import Comment
 from ..models.user import User
 from ..constants import BLOG_KEY, COMMENT_KEY
 
+
 class StarredBlogPostHandler(BlogHandler):
     """Defines the Starred Post functionality"""
     def get(self):
         """Displays all of the users starred posts"""
         if not self.user:
-            self.redirect("/login")
+            return self.redirect("/login")
 
         blog_posts = []
         comments = []
@@ -18,7 +19,8 @@ class StarredBlogPostHandler(BlogHandler):
             blog_post = BlogPost.get_by_id(int(blog_id), parent=BLOG_KEY)
             if blog_post:
                 blog_posts.append(blog_post)
-                comments.append(Comment.get_by_id(blog_post.comment_ids, parent=COMMENT_KEY))
+                comments.append(Comment.get_by_id(blog_post.comment_ids,
+                                                  parent=COMMENT_KEY))
                 creators.append(User.get_by_id(blog_post.user_id).username)
 
         self.render("blog_post.html",

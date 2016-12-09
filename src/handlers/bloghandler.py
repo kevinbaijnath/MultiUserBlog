@@ -9,10 +9,12 @@ TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "templates")
 JINJA_ENV = jinja2.Environment(loader=jinja2.FileSystemLoader(TEMPLATE_DIR),
                                autoescape=True)
 
+
 def render_str(template, **params):
     """Renders a template along with any parameters as a string"""
     template = JINJA_ENV.get_template(template)
     return template.render(params)
+
 
 class BlogHandler(webapp2.RequestHandler):
     """BaseClass for the Blog"""

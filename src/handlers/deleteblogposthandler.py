@@ -14,7 +14,7 @@ class DeleteBlogPostHandler(BlogHandler):
         blog_post = BlogPost.get_by_id(int(blog_id), parent=BLOG_KEY)
 
         # Check to make sure that the user is authorized to delete this post
-        if not blog_post or not blog_post.user_id != self.user.key().id():
+        if not blog_post or blog_post.user_id != self.user.key().id():
             return self.redirect("/login")
 
         # Comments are being removed to prevent them from being orphaned

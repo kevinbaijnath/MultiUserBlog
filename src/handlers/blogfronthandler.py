@@ -32,4 +32,7 @@ class BlogFrontHandler(BlogHandler):
                         creators=creators,
                         user_id=user_id)
         else:
-            self.render("blog_post.html", error=error, blog_posts=[], comments=[])
+            self.render("blog_post.html",
+                        error=error,
+                        blog_posts=[],
+                        comments=[])

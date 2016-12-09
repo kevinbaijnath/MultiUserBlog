@@ -17,7 +17,7 @@ class DeleteBlogPostHandler(BlogHandler):
         if not blog_post or not blog_post.user_id != self.user.key().id():
             return self.redirect("/login")
 
-        # We need to remove the comments as well to preven them from being orphaned
+        # Comments are being removed to prevent them from being orphaned
         comments = Comment.get_by_id(blog_post.comment_ids, parent=COMMENT_KEY)
         for comment in comments:
             if comment:

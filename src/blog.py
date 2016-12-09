@@ -36,5 +36,5 @@ app = webapp2.WSGIApplication([("/", MainHandler),
                                ("/welcome/?", WelcomeHandler),
                                ("/logout/?", LogoutHandler),
                                ("/login/?", LoginHandler)
-                              ],
+                               ],
                               debug=True)

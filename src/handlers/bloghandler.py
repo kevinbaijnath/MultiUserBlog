@@ -1,7 +1,6 @@
 import os
 import jinja2
 import webapp2
-
 from ..helpers.securestring import SecureString
 from ..models.user import User
 

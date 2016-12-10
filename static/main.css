@@ -9,7 +9,7 @@
     font-size: 30px;
 }
 
-button[type='submit'] {
+button[type='submit'], .move-down {
     margin-top: 15px;
 }
 

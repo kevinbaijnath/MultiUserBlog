@@ -1,17 +1,17 @@
+from ..constants import BLOG_KEY, COMMENT_KEY
 from ..handlers.bloghandler import BlogHandler
+from ..helpers.decorators import logged_in
 from ..models.blogpost import BlogPost
 from ..models.comment import Comment
 from ..models.user import User
-from ..constants import BLOG_KEY, COMMENT_KEY
 
 
 class StarredBlogPostHandler(BlogHandler):
     """Defines the Starred Post functionality"""
+
+    @logged_in
     def get(self):
         """Displays all of the users starred posts"""
-        if not self.user:
-            return self.redirect("/login")
-
         blog_posts = []
         comments = []
         creators = []

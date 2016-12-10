@@ -5,6 +5,7 @@ from ..models.user import User
 
 class LoginHandler(BlogHandler):
     """Defines the login functionality"""
+
     def get(self):
         """Shows the login page"""
         self.render("login.html")

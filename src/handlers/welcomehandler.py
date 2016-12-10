@@ -1,11 +1,11 @@
 from ..handlers.bloghandler import BlogHandler
+from ..helpers.decorators import logged_in
 
 
 class WelcomeHandler(BlogHandler):
     """Defines the WelcomePage for the logged in user"""
+
+    @logged_in
     def get(self):
         """Renders the welcome.html page"""
-        if self.user:
-            self.render("welcome.html", username=self.user.username)
-        else:
-            return self.redirect("/login")
+        self.render("welcome.html", username=self.user.username)

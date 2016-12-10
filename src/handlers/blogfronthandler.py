@@ -1,8 +1,8 @@
+from ..constants import BLOG_KEY, COMMENT_KEY
 from ..handlers.bloghandler import BlogHandler
 from ..models.blogpost import BlogPost
 from ..models.comment import Comment
 from ..models.user import User
-from ..constants import BLOG_KEY, COMMENT_KEY
 
 
 class BlogFrontHandler(BlogHandler):

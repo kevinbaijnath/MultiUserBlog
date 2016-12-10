@@ -1,22 +1,20 @@
-from ..handlers.bloghandler import BlogHandler
-from ..models.blogpost import BlogPost
 from ..constants import BLOG_KEY
+from ..handlers.bloghandler import BlogHandler
+from ..helpers.decorators import logged_in
+from ..models.blogpost import BlogPost
 
 
 class NewBlogPostHandler(BlogHandler):
     """New blog post page"""
 
+    @logged_in
     def get(self):
         """Render the new blog post page"""
-        if not self.user:
-            return self.redirect("/login")
-
         self.render("create_post.html", error="")
 
+    @logged_in
     def post(self):
         """NewBlogPost form submission"""
-        if not self.user:
-            return self.redirect("/login")
 
         subject = self.request.get("subject")
         content = self.request.get("content")

@@ -1,6 +1,6 @@
+from ..constants import USER_RE, PASSWORD_RE, EMAIL_RE
 from ..handlers.bloghandler import BlogHandler
 from ..models.user import User
-from ..constants import USER_RE, PASSWORD_RE, EMAIL_RE
 
 
 class RegistrationHandler(BlogHandler):
